@@ -11,15 +11,17 @@ Includes:
 
 import numpy as np
 from sampling import sample_cos_theta
+from scipy.integrate import solve_ivp
 
 class Neutron:
-    def __init__(self, position = None, direction = None, alive = True):
+    def __init__(self, position = None, velocity = None, mass = 1.0, alive = True):
         """
-        Initialize a neutron with position, direction, and alive status.
-        If position or direction are not provided, defaults are used.
+        Initialize a neutron with position, velocity, mass, and alive status.
+        If position or velocity are not provided, defaults are used.
         """
         self.position = np.array(position if position is not None else [0.0, 0.0, 0.0], dtype = float)
-        self.direction = np.array(direction, dtype = float) if direction is not None else self.random_direction()
+        self.velocity = np.array(velocity, dtype = float) if velocity is not None else self.random_direction()
+        self.mass = mass
         self.alive = alive
 
     def random_direction(self):
@@ -34,11 +36,29 @@ class Neutron:
         z = np.cos(theta)
         return np.array([x, y, z])
 
-    def move(self, distance):
+    def acceleration(self, t):
         """
-        Move the neutron along its current direction by a given distance.
+        Define acceleration as force/mass. Override for different forces.
         """
-        self.position += distance * self.direction
+        return np.array([0.0, 0.0, -9.8]) / self.mass
+
+    def move_ode(self, t_span):
+        """
+        Move the neutron using 2nd-order ODE integration over time t_span.
+        t_span: tuple (t_start, t_end)
+        """
+        def ode(t, y):
+            pos = y[:3]
+            vel = y[3:]
+            dydt = np.zeros(6)
+            dydt[:3] = vel
+            dydt[3:] = self.acceleration(t)
+            return dydt
+
+        y0 = np.concatenate([self.position, self.velocity])
+        sol = solve_ivp(ode, t_span, y0, method='RK45', max_step=0.01)
+        self.position = sol.y[:3, -1]
+        self.velocity = sol.y[3:, -1]
 
     def scatter(self):
         """

@@ -1,42 +1,44 @@
-"""
+""""
 main.py
 
-Main driver for Monte Carlo neutron transport simulation.
-
-- Runs the neutron transport simulation
-- Collects path lengths
-- Plots results to visualize distributions
+Entry point for the Monte Carlo neutron transport simulation.
+Runs the Simulation class and visualizes results.
 """
 
-import numpy as np
 import matplotlib.pyplot as plt
-from transport import run_transport
+from transport import Simulation
+
 
 def plot_path_lengths(paths):
     """
     Plot a histogram of neutron path lengths.
     """
+    plt.figure(figsize=(8, 5))
     plt.hist(paths, bins = 50, density = True, alpha = 0.7, color = "skyblue")
-    plt.xlabel("Path length")
-    plt.ylabel("Probability density")
+    plt.xlabel("Path Length")
+    plt.ylabel("Probability Density")
     plt.title("Neutron Free Path Distribution")
     plt.grid(True)
     plt.show()
 
-def main():
-    # Simulation parameters
-    num_neutrons = 5000
-    mean_free_path = 1.0
-    scatter_prob = 0.7
-    absorb_prob = 0.3
 
-    # Run simulation
-    paths = run_transport(num_neutrons, mean_free_path, scatter_prob, absorb_prob)
+def main():
+    # Create and run a simulation instance
+    sim = Simulation(
+        num_neutrons = 1000,
+        scatter_prob = 0.7,
+        absorb_prob = 0.3,
+    )
+
+    print("Running simulation...")
+    paths = sim.run()
+
     print(f"Simulated {len(paths)} neutron collisions.")
-    print(f"Average path length: {np.mean(paths):.3f}")
+    print(f"Average path length: {sum(paths) / len(paths):.3f}")
 
     # Plot results
     plot_path_lengths(paths)
+
 
 if __name__ == "__main__":
     main()
