@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "montecarlo-transport"
+version = "0.1.0"
+description = "Monte Carlo neutron transport simulation with ODE-based motion"
+readme = "README.md"
+requires-python = ">=3.8"
+
+authors = [
+  { name="Amelia Abruscato, Shreyan Goswami", email="arabrusc@syr.edu, sgoswa03@syr.edu" }
+]
+
+dependencies = [
+  "numpy",
+  "scipy",
+  "matplotlib"
+]
+
+[project.scripts]
+run-transport = "main:main"
