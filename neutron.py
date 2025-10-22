@@ -47,7 +47,8 @@ class Neutron:
         """
         Define acceleration as force/mass. Override for different forces.
         """
-        return np.array([0.0, 0.0, -9.8]) / self.mass
+        # No external forces - neutrons travel in straight lines
+        return np.array([0.0, 0.0, 0.0])
 
     def move_ode(self, t_span):
         """
