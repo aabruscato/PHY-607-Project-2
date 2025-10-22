@@ -13,14 +13,21 @@ import numpy as np
 from sampling import sample_cos_theta
 from scipy.integrate import solve_ivp
 
+
 class Neutron:
-    def __init__(self, position = None, velocity = None, mass = 1.0, alive = True):
+    def __init__(self, position=None, velocity=None, mass=1.0, alive=True):
         """
         Initialize a neutron with position, velocity, mass, and alive status.
         If position or velocity are not provided, defaults are used.
         """
-        self.position = np.array(position if position is not None else [0.0, 0.0, 0.0], dtype = float)
-        self.velocity = np.array(velocity, dtype = float) if velocity is not None else self.random_direction()
+        self.position = np.array(
+            position if position is not None else [0.0, 0.0, 0.0], dtype=float
+        )
+        self.velocity = (
+            np.array(velocity, dtype=float)
+            if velocity is not None
+            else self.random_direction()
+        )
         self.mass = mass
         self.alive = alive
 
@@ -30,7 +37,7 @@ class Neutron:
         Uses uniform sampling over the sphere.
         """
         theta = np.arccos(2 * np.random.random() - 1)  # polar angle
-        phi = 2 * np.pi * np.random.random()             # azimuthal angle
+        phi = 2 * np.pi * np.random.random()  # azimuthal angle
         x = np.sin(theta) * np.cos(phi)
         y = np.sin(theta) * np.sin(phi)
         z = np.cos(theta)
@@ -47,6 +54,7 @@ class Neutron:
         Move the neutron using 2nd-order ODE integration over time t_span.
         t_span: tuple (t_start, t_end)
         """
+
         def ode(t, y):
             pos = y[:3]
             vel = y[3:]
@@ -56,7 +64,7 @@ class Neutron:
             return dydt
 
         y0 = np.concatenate([self.position, self.velocity])
-        sol = solve_ivp(ode, t_span, y0, method='RK45', max_step=0.01)
+        sol = solve_ivp(ode, t_span, y0, method="RK45", max_step=0.01)
         self.position = sol.y[:3, -1]
         self.velocity = sol.y[3:, -1]
 
@@ -68,9 +76,17 @@ class Neutron:
         theta = sample_cos_theta()[0]  # returns a single sample
         phi = 2 * np.pi * np.random.random()  # uniform azimuthal angle
 
+        # Get current speed to maintain it after scattering
+        speed = np.linalg.norm(self.velocity)
+
         # Convert to Cartesian coordinates
-        self.direction = np.array([
-            np.sin(theta) * np.cos(phi),
-            np.sin(theta) * np.sin(phi),
-            np.cos(theta)
-        ])
+        new_direction = np.array(
+            [
+                np.sin(theta) * np.cos(phi),
+                np.sin(theta) * np.sin(phi),
+                np.cos(theta),
+            ]
+        )
+
+        # Update velocity with new direction, preserving speed
+        self.velocity = speed * new_direction

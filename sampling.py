@@ -10,7 +10,8 @@ Includes:
 
 import numpy as np
 
-def sample_exponential(mean_free_path, size = 1, rng = None):
+
+def sample_exponential(mean_free_path, size=1, rng=None):
     """
     Generates an array of distances that the neutron will travel before
     it collides with a uranium atom using the inverse CDF method.
@@ -20,7 +21,7 @@ def sample_exponential(mean_free_path, size = 1, rng = None):
     return -mean_free_path * np.log(1.0 - u)
 
 
-def sample_cos_theta(size = 1, rng = None):
+def sample_cos_theta(size=1, rng=None):
     """
     Generates random scattering angles (theta) for neutrons using
     rejection sampling from a distribution proportional to cos(theta).
@@ -29,9 +30,8 @@ def sample_cos_theta(size = 1, rng = None):
     samples = []
     M = 1.0  # max value of cos(theta)
     while len(samples) < size:
-        theta = rng.random() * (np.pi / 2)
+        theta = rng.random() * np.pi  # full range [0, pi]
         u = rng.random() * M
-        if u <= np.cos(theta):
+        if u <= np.abs(np.cos(theta)):  # use abs to handle negative values
             samples.append(theta)
     return np.array(samples)
-
